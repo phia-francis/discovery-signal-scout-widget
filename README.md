@@ -1,0 +1,1 @@
+# discovery-signal-scout-widget
