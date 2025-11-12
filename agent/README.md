@@ -8,6 +8,20 @@ pip install -e .
 signal-scout run --config config.yaml
 ```
 
+### Working behind a proxy / offline installs
+
+If your environment blocks outbound traffic to PyPI, make sure the bundled
+`setuptools` wheel that ships with Python is activated before installing the
+package dependencies:
+
+```bash
+python -m ensurepip --upgrade
+```
+
+This uses the standard-library wheel instead of attempting to fetch a newer
+release through the proxy. After running the command once per virtualenv you
+can proceed with `pip install -e .[dev]` without extra network hops.
+
 Deploy
 
 Docker: docker build -t signal-scout . && docker run -v $PWD/signals:/app/signals signal-scout
