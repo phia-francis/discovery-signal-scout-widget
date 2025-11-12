@@ -6,6 +6,19 @@ Archetype-aware horizon scanning for Nesta missions. Outputs daily Markdown+CSV+
 pip install -r requirements.txt
 pip install -e .
 signal-scout run --config config.yaml
+
+# Excel-enhanced shortlist (includes mission/category tags + Mission-Radar summaries)
+python signal_scout_excel_enhanced.py \
+  --config config.yaml \
+  --excel_keywords "Auto horizon scanning_ keywords.xlsx" \
+  --out_dir signals
+```
+
+The workbook is committed as a base64 text asset at `data/auto_keywords.xlsx.b64`.
+The runner will materialise `Auto horizon scanning_ keywords.xlsx` on demand, so
+if you remove or overwrite the file you can regenerate the default version by
+rerunning the command above.
+
 ```
 
 ### Working behind a proxy / offline installs
@@ -32,6 +45,10 @@ GitHub Actions: the `deploy` job in `.github/workflows/ci.yml` is gated behind t
 `prod` environment. Configure that environment with secrets named
 `OPENAI_API_KEY` (and optionally `OPENAI_MODEL`) so that the LLM fallback can run
 without storing credentials in the repository.
+
+The scheduled `daily-agent.yml` workflow uses the Excel-enhanced runner to publish
+`signals/latest.json` and date-stamped snapshots to the `gh-pages` branch. Update the
+workbook (`Auto horizon scanning_ keywords.xlsx`) to tweak mission/category matches.
 
 Optional: install discovery_utils for GtR/Hansard enrichment.
 Environment for LLM archetype (optional): LLM_PROVIDER=openai and OPENAI_API_KEY=...
