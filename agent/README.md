@@ -28,5 +28,10 @@ Docker: docker build -t signal-scout . && docker run -v $PWD/signals:/app/signal
 
 Cron: 0 9 * * 1-7 /usr/local/bin/signal-scout run --config /opt/signal-scout/config.yaml >> /var/log/signal-scout.log 2>&1
 
+GitHub Actions: the `deploy` job in `.github/workflows/ci.yml` is gated behind the
+`prod` environment. Configure that environment with secrets named
+`OPENAI_API_KEY` (and optionally `OPENAI_MODEL`) so that the LLM fallback can run
+without storing credentials in the repository.
+
 Optional: install discovery_utils for GtR/Hansard enrichment.
 Environment for LLM archetype (optional): LLM_PROVIDER=openai and OPENAI_API_KEY=...

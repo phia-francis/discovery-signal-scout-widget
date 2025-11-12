@@ -1,4 +1,15 @@
 name: ci
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: agent
+
 on:
   push: {branches: ["main"]}
   pull_request:
@@ -9,8 +20,34 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
         with: {python-version: "3.11"}
       - run: pip install -r requirements.txt
       - run: pip install -e .[dev]
       - run: ruff check .
       - run: pytest -q
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: prod
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - run: pip install -e .
+      - name: Run Signal Scout
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+        run: signal-scout run --config config.yaml
+      - name: Upload signals artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: signals
+          path: signals
