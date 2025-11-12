@@ -3,11 +3,14 @@
 This repository houses the production-ready Signal Scout agent, the Mission-Radar widget and
 supporting automation for publishing daily signals. The layout mirrors the recommended
 mono-repo structure:
+This repository houses the production-ready Signal Scout agent and (future) widget surfaces.
+The layout mirrors the recommended mono-repo structure:
 
 ```
 .
 ├─ agent/                 # Python Signal Scout package, CLI, tests and CI config
 ├─ widget/                # React/Vite widget that consumes the latest JSON
+├─ widget/                # Placeholder for the web widget (to be added later)
 ├─ signals/               # Output artefacts written by the agent (ignored from Git)
 └─ README.md
 ```
@@ -25,3 +28,5 @@ mono-repo structure:
 The Pages site serves the widget at the repository root and the JSON under `/signals/latest.json`.
 
 See `agent/README.md` for detailed agent usage and `widget/README.md` for embed guidance.
+The `agent/` directory contains the installable Python package along with configuration,
+Dockerfile and GitHub Actions workflow. See `agent/README.md` for full usage instructions.
