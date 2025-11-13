@@ -1,5 +1,35 @@
 from __future__ import annotations
 import argparse, os, json, datetime as dt, logging
+from typing import List, Dict, Optional
+
+try:  # Optional dependency; only needed for full CLI runs
+    import pandas as pd  # type: ignore
+except ImportError:  # pragma: no cover - exercised in proxy-restricted CI
+    pd = None  # type: ignore
+
+from .config import load_config
+from .classifiers import mission_relevance, focus_brand_rules, brief_summary_from, equity_lens, sentence_signal
+from .archetypes import classify_archetype_rules
+from .llm_ensemble import ensemble_archetype
+from .render import render_markdown, render_html
+from .persistence import ensure_db, log_raw, log_picks
+
+def _coerce_datetime(value: str) -> Optional[dt.datetime]:
+    """Convert date strings to timezone-aware datetimes without requiring pandas."""
+
+    if pd is not None:
+        item_dt = pd.to_datetime(value, utc=True, errors="coerce")  # type: ignore[assignment]
+        return item_dt.to_pydatetime() if item_dt is not None else None
+    try:
+        parsed = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
+        return parsed if parsed.tzinfo else parsed.replace(tzinfo=dt.timezone.utc)
+    except Exception:
+        return None
+
+
+def build_rows(items: List[Dict], cfg: Dict) -> List[Dict]:
+    from .scoring import credibility, novelty, has_data_terms  # Heavy deps imported lazily
+
 from typing import List, Dict
 import pandas as pd
 
@@ -34,6 +64,7 @@ def build_rows(items: List[Dict], cfg: Dict) -> List[Dict]:
             a_fit = min(5.0, a_fit + cfg["archetype_nudges"]["field_fit_bonus"])
         # Recency
         run_dt = dt.datetime.now(dt.timezone.utc)
+        item_dt = _coerce_datetime(it["date"])
         item_dt = pd.to_datetime(it["date"], utc=True, errors="coerce")
         days = max(1, (run_dt - item_dt).days if item_dt is not None else 999)
         recency = max(0.0, 5.0 - min(5.0, days/6.0))
@@ -88,6 +119,10 @@ def shortlist(rows: List[Dict], cfg: Dict) -> List[Dict]:
 
 def run_once(cfg_path: str) -> List[Dict]:
     cfg = load_config(cfg_path)
+    from .collectors import collect_all  # Imported lazily to avoid feedparser dependency in tests
+    from .dedupe import dedupe as ddu, cap_per_source  # avoid langdetect import when unused
+
+    items = collect_all(cfg)
     items = collect_all(cfg)
     from .dedupe import dedupe as ddu, cap_per_source
     items = ddu(items)
@@ -104,6 +139,8 @@ def run_once(cfg_path: str) -> List[Dict]:
     base = f"signals/{today}"
     md = render_markdown(picks)
     print(md)
+    if pd is None:
+        raise RuntimeError("pandas is required to export CSV/HTML outputs; install optional deps.")
     pd.DataFrame(picks).to_csv(base + ".csv", index=False)
     open(base + ".json","w",encoding="utf-8").write(json.dumps(picks, ensure_ascii=False, indent=2))
     open(base + ".html","w",encoding="utf-8").write(render_html(picks, today))
