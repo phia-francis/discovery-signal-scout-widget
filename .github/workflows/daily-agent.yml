@@ -8,6 +8,7 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    environment: prod
     permissions:
       contents: write
     steps:
@@ -20,6 +21,9 @@ jobs:
           pip install -r agent/requirements.txt
           pip install -e agent/.
       - name: Run Excel-enhanced agent
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
         run: |
           python agent/signal_scout_excel_enhanced.py \
             --config agent/config.yaml \
