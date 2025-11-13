@@ -1,0 +1,53 @@
+name: deploy-widget
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-widget
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: widget/package-lock.json
+      - name: Configure npm registry (proxy aware)
+        env:
+          NPM_REGISTRY_URL: ${{ secrets.NPM_REGISTRY_URL }}
+          NPM_HTTP_PROXY: ${{ secrets.NPM_HTTP_PROXY }}
+          NPM_HTTPS_PROXY: ${{ secrets.NPM_HTTPS_PROXY }}
+        run: |
+          REG="${NPM_REGISTRY_URL:-https://registry.npmjs.org}"
+          npm config set registry "$REG"
+          if [ -n "${NPM_HTTP_PROXY:-}" ]; then
+            npm config set proxy "$NPM_HTTP_PROXY"
+            npm config set http-proxy "$NPM_HTTP_PROXY"
+          fi
+          if [ -n "${NPM_HTTPS_PROXY:-}" ]; then
+            npm config set https-proxy "$NPM_HTTPS_PROXY"
+          fi
+          npm config set fetch-retry-maxtimeout 120000
+        working-directory: widget
+      - name: Install dependencies
+        run: npm install
+        working-directory: widget
+      - name: Build widget
+        run: npm run build
+        working-directory: widget
+      - name: Publish widget to gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: widget/dist
+          keep_files: true
