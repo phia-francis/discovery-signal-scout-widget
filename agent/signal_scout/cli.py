@@ -30,6 +30,20 @@ def _coerce_datetime(value: str) -> Optional[dt.datetime]:
 def build_rows(items: List[Dict], cfg: Dict) -> List[Dict]:
     from .scoring import credibility, novelty, has_data_terms  # Heavy deps imported lazily
 
+from typing import List, Dict
+import pandas as pd
+
+from .config import load_config
+from .collectors import collect_all
+from .dedupe import dedupe, cap_per_source
+from .classifiers import mission_relevance, focus_brand_rules, brief_summary_from, equity_lens, sentence_signal
+from .archetypes import classify_archetype_rules
+from .llm_ensemble import ensemble_archetype
+from .scoring import credibility, novelty, has_data_terms
+from .render import render_markdown, render_html
+from .persistence import ensure_db, log_raw, log_picks
+
+def build_rows(items: List[Dict], cfg: Dict) -> List[Dict]:
     prior_titles = [it["title"] for it in items]
     rows = []
     for it in items:
@@ -51,6 +65,7 @@ def build_rows(items: List[Dict], cfg: Dict) -> List[Dict]:
         # Recency
         run_dt = dt.datetime.now(dt.timezone.utc)
         item_dt = _coerce_datetime(it["date"])
+        item_dt = pd.to_datetime(it["date"], utc=True, errors="coerce")
         days = max(1, (run_dt - item_dt).days if item_dt is not None else 999)
         recency = max(0.0, 5.0 - min(5.0, days/6.0))
         w = cfg["weights"]
@@ -108,6 +123,8 @@ def run_once(cfg_path: str) -> List[Dict]:
     from .dedupe import dedupe as ddu, cap_per_source  # avoid langdetect import when unused
 
     items = collect_all(cfg)
+    items = collect_all(cfg)
+    from .dedupe import dedupe as ddu, cap_per_source
     items = ddu(items)
     items = cap_per_source(items, cfg["per_source_cap"])
     if not items:

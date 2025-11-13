@@ -19,6 +19,8 @@ The runner will materialise `Auto horizon scanning_ keywords.xlsx` on demand, so
 if you remove or overwrite the file you can regenerate the default version by
 rerunning the command above.
 
+```
+
 ### Working behind a proxy / offline installs
 
 If your environment blocks outbound traffic to PyPI, make sure the bundled
