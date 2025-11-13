@@ -28,5 +28,31 @@ The layout mirrors the recommended mono-repo structure:
 The Pages site serves the widget at the repository root and the JSON under `/signals/latest.json`.
 
 See `agent/README.md` for detailed agent usage and `widget/README.md` for embed guidance.
+
+## Run everything on GitHub (zero local install)
+
+You can operate the full stack straight from the GitHub UI:
+
+1. **Add secrets once.**
+   - Open **Settings → Secrets and variables → Actions**.
+   - For the optional LLM fallback used by the gated `deploy` job in `ci.yml`, add
+     `OPENAI_API_KEY` (and `OPENAI_MODEL` if you want to override the default model)
+     under the `prod` environment.
+   - If your widget build needs a custom npm registry or proxy, add `NPM_REGISTRY_URL`,
+     `NPM_HTTP_PROXY`, and `NPM_HTTPS_PROXY` repository secrets (the deploy workflow
+     reads them automatically).
+2. **Trigger the daily agent run.** Go to **Actions → daily-agent → Run workflow** and
+   target the `main` branch. The workflow installs the agent, materialises the Excel
+   keywords, writes `agent/signals/YYYY-MM-DD.json` plus `agent/signals/latest.json`,
+   and publishes them to the `gh-pages` branch under `/signals/`.
+3. **Serve via GitHub Pages.** In **Settings → Pages**, choose Branch `gh-pages`,
+   folder `/`. Once the first workflow completes, GitHub Pages serves the widget bundle
+   (from `deploy-widget.yml`) at `https://<user>.github.io/<repo>/` and the JSON feed at
+   `https://<user>.github.io/<repo>/signals/latest.json`.
+4. **Verify.** Visit the Pages URL above. The bundled widget automatically loads the
+   published JSON, so you should see a populated table without installing anything
+   locally.
+
+Repeat step 2 whenever you need a fresh run; everything else is automated.
 The `agent/` directory contains the installable Python package along with configuration,
 Dockerfile and GitHub Actions workflow. See `agent/README.md` for full usage instructions.
