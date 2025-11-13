@@ -19,6 +19,7 @@ jobs:
         run: |
           pip install -r requirements.txt
           pip install pytest>=8.1.1 ruff>=0.6.8
+          pip install -e .[dev]
         run: |
           pip install -r agent/requirements.txt
           pip install -e agent/.[dev]
@@ -44,6 +45,9 @@ jobs:
         working-directory: agent
         run: |
           pip install -r requirements.txt
+          pip install -e .
+      - name: Run Signal Scout
+        working-directory: agent
       - name: Run Signal Scout
         working-directory: agent
       - name: Install agent
