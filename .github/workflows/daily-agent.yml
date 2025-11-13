@@ -19,6 +19,14 @@ jobs:
       - name: Install dependencies
         working-directory: agent
         run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Install agent
+        working-directory: agent
+        run: |
+          python -m pip install -e .
+      - name: Run Excel-enhanced agent
+        working-directory: agent
           pip install -r requirements.txt
       - name: Install agent
         run: |
@@ -29,6 +37,12 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
         run: |
+          python signal_scout_excel_enhanced.py \
+            --config config.yaml \
+            --excel_keywords "Auto horizon scanning_ keywords.xlsx" \
+            --out_dir signals
+      - name: QA
+        working-directory: agent
           python agent/signal_scout_excel_enhanced.py \
             --config agent/config.yaml \
             --excel_keywords "agent/Auto horizon scanning_ keywords.xlsx" \
@@ -38,6 +52,7 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
+          latest = Path('signals/latest.json')
           latest = Path('agent/signals/latest.json')
           assert latest.exists(), "latest.json missing"
           rows = json.loads(latest.read_text('utf-8'))
@@ -46,6 +61,13 @@ jobs:
           print("OK", len(rows))
           PY
       - name: Prepare publish directory
+        working-directory: agent
+        run: |
+          rm -rf publish-signals
+          mkdir -p publish-signals
+          cp signals/*.json publish-signals/
+          if ls signals/*.csv 1>/dev/null 2>&1; then
+            cp signals/*.csv publish-signals/
         run: |
           rm -rf agent/publish-signals
           mkdir -p agent/publish-signals
