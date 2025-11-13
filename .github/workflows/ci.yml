@@ -1,0 +1,69 @@
+name: ci
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        working-directory: agent
+        run: |
+          pip install -r requirements.txt
+          pip install pytest>=8.1.1 ruff>=0.6.8
+          pip install -e .[dev]
+      - name: Ruff
+        run: ruff check .
+        working-directory: agent
+      - name: Pytest
+        run: pytest -q
+        working-directory: agent
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: prod
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install runtime dependencies
+        working-directory: agent
+        run: |
+          pip install -r requirements.txt
+          pip install -e .
+      - name: Run Signal Scout
+        working-directory: agent
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+        run: |
+          python -m signal_scout.cli run --config config.yaml
+      - name: QA
+        run: |
+          python - <<'PY'
+          import glob
+          import json
+          paths = sorted(glob.glob('agent/signals/*.json'))
+          assert paths, "No signal JSON generated"
+          rows = json.load(open(paths[-1]))
+          assert rows, "No rows"
+          assert max(r.get("total_score", 0) for r in rows) >= 3.5, "No strong signals"
+          print("OK", len(rows))
+          PY
+      - name: Upload signals artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: signals
+          path: agent/signals
