@@ -30,6 +30,11 @@ optional-dependencies.dev = ["pytest>=8.1.1","ruff>=0.6.8"]
 [project.scripts]
 signal-scout = "signal_scout.cli:main"
 
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["signal_scout*"]
+exclude = ["agent.data", "data"]
+
 [tool.ruff]
 line-length = 100
 select = ["E","F","W","I"]
