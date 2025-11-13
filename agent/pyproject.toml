@@ -1,4 +1,6 @@
 [build-system]
+requires = ["setuptools"]
+requires = ["setuptools>=65"]
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
@@ -24,12 +26,19 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.1.1", "ruff>=0.6.8"]
+[project.optional-dependencies]
+dev = ["pytest>=8.1.1", "ruff>=0.6.8"]
+optional-dependencies.dev = ["pytest>=8.1.1","ruff>=0.6.8"]
 
 [project.scripts]
 signal-scout = "signal_scout.cli:main"
 
 [tool.setuptools]
 packages = ["signal_scout"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["signal_scout*"]
+exclude = ["agent.data", "data"]
 
 [tool.ruff]
 line-length = 100
