@@ -28,6 +28,16 @@ th{cursor:pointer;position:sticky;top:0;background:#fafafa}
 tfoot td{background:#fafafa;font-weight:600}
 </style></head><body><h1>Signal Scout — Daily Results</h1>
 <p class="small">Date: ${report_date}</p>
+    head = f"""<!doctype html><html><head><meta charset="utf-8"><title>Signal Scout</title>
+<style>
+body{{font-family:system-ui,Segoe UI,Arial;padding:24px}}
+table{{border-collapse:collapse;width:100%}} th,td{{border:1px solid #ddd;padding:8px;vertical-align:top}}
+th{{cursor:pointer;position:sticky;top:0;background:#fafafa}}
+.small{{color:#555;font-size:12px}}
+.badge{{display:inline-block;padding:2px 6px;border-radius:6px;background:#eef;font-size:12px;margin-right:4px}}
+tfoot td{{background:#fafafa;font-weight:600}}
+</style></head><body><h1>Signal Scout — Daily Results</h1>
+<p class="small">Date: {report_date}</p>
 <table id="tbl"><thead><tr>
 <th>Signal</th><th>Source</th><th>Mission</th><th>Archetype</th><th>Brief summary</th><th>Equity</th><th>Score</th><th>Tags</th>
 </tr></thead><tbody>
@@ -55,6 +65,12 @@ tfoot td{background:#fafafa;font-weight:600}
         """
 </tbody><tfoot><tr>
 <td colspan="8">Avg relevance=${avg_relevance} • Avg credibility=${avg_credibility} • Avg novelty=${avg_novelty} • Missions=[${missions}] • Archetypes=[${archetypes}]</td>
+    avg = lambda k: round(sum(r[k] for r in rows)/len(rows),2) if rows else 0
+    missions = ", ".join(sorted(set(r["mission_links"] for r in rows)))
+    archs = ", ".join(sorted(set(r["archetype"] for r in rows)))
+    foot = f"""
+</tbody><tfoot><tr>
+<td colspan="8">Avg relevance={avg('relevance')} • Avg credibility={avg('credibility')} • Avg novelty={avg('novelty')} • Missions=[{missions}] • Archetypes=[{archs}]</td>
 </tr></tfoot></table>
 <script>
 const getCell=(tr,i)=>tr.children[i].innerText||tr.children[i].textContent;
@@ -66,6 +82,7 @@ document.querySelectorAll('#tbl th').forEach((th,i)=>{
     rows.sort((a,b)=>getCell(a,i).localeCompare(getCell(b,i),undefined,{numeric:true})*(asc?1:-1));
     tbody.innerHTML='';
     rows.forEach(r=>tbody.appendChild(r));
+    tbody.innerHTML=''; rows.forEach(r=>tbody.appendChild(r));
     th.parentElement.querySelectorAll('th').forEach(x=>x.classList.remove('asc','desc'));
     th.classList.add(asc?'asc':'desc');
   });
