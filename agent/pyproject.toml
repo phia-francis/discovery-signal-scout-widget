@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "signal-scout"
+version = "0.1.0"
+description = "Archetype-aware horizon scanning for Nesta missions"
+authors = [{name="Nesta Signal Scout", email="signals@nesta.org.uk"}]
+requires-python = ">=3.9"
+readme = "README.md"
+dependencies = [
+  "feedparser>=6.0.10",
+  "requests>=2.32.3",
+  "beautifulsoup4>=4.12.3",
+  "html5lib>=1.1",
+  "python-dateutil>=2.9.0.post0",
+  "rapidfuzz>=3.9.7",
+  "pandas>=2.2.2",
+  "PyYAML>=6.0.2",
+  "simhash>=2.1.2",
+  "langdetect>=1.0.9"
+]
+optional-dependencies.dev = ["pytest>=8.1.1","ruff>=0.6.8"]
+
+[project.scripts]
+signal-scout = "signal_scout.cli:main"
+
+[tool.ruff]
+line-length = 100
+select = ["E","F","W","I"]
