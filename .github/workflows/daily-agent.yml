@@ -20,6 +20,10 @@ jobs:
         working-directory: agent
         run: |
           pip install -r requirements.txt
+      - name: Install agent
+        run: |
+          pip install -r agent/requirements.txt
+          pip install -e agent/.
       - name: Run Excel-enhanced agent
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
