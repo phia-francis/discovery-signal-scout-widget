@@ -8,45 +8,46 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    environment: prod
+    environment:
+      name: prod
     permissions:
       contents: write
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
       CRUNCHBASE_API_KEY: ${{ secrets.CRUNCHBASE_API_KEY }}
+    defaults:
+      run:
+        working-directory: agent
+        shell: bash
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - name: Install dependencies
-        working-directory: agent
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
       - name: Run Excel-enhanced agent
-        working-directory: agent
         run: |
           python signal_scout_excel_enhanced.py \
             --config config.yaml \
             --excel_keywords "Auto horizon scanning_ keywords.xlsx" \
             --out_dir signals
       - name: QA
-        working-directory: agent
         run: |
           python - <<'PY'
-            import json
-            from pathlib import Path
-            latest = Path('signals/latest.json')
-            assert latest.exists(), "latest.json missing"
-            rows = json.loads(latest.read_text('utf-8'))
-            assert rows, "No rows"
-            assert max(r.get("total_score", 0) for r in rows) >= 3.5, "No strong signals"
-            print("OK", len(rows))
-          PY
+import json
+from pathlib import Path
+latest = Path('signals/latest.json')
+assert latest.exists(), "latest.json missing"
+rows = json.loads(latest.read_text('utf-8'))
+assert rows, "No rows"
+assert max(r.get("total_score", 0) for r in rows) >= 3.5, "No strong signals"
+print("OK", len(rows))
+PY
       - name: Prepare publish directory
-        working-directory: agent
         run: |
           rm -rf publish-signals
           mkdir -p publish-signals
