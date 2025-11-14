@@ -16,6 +16,11 @@ jobs:
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: agent
+    steps:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -27,6 +32,9 @@ jobs:
           python-version: "3.11"
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Run Excel-enhanced agent
           cd agent
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
