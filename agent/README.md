@@ -19,6 +19,8 @@ The runner will materialise `Auto horizon scanning_ keywords.xlsx` on demand, so
 if you remove or overwrite the file you can regenerate the default version by
 rerunning the command above.
 
+```
+
 ### Working behind a proxy / offline installs
 
 If your environment blocks outbound traffic to PyPI, make sure the bundled
@@ -53,4 +55,5 @@ GitHub repository) so the agent can enrich the shortlist with GtR, Hansard and
 Crunchbase queries. If you run Crunchbase searches you must provide
 `CRUNCHBASE_API_KEY` (export locally or add it as an Actions secret/environment
 variable) so the helper library can authenticate.
+Optional: install discovery_utils for GtR/Hansard enrichment.
 Environment for LLM archetype (optional): LLM_PROVIDER=openai and OPENAI_API_KEY=...

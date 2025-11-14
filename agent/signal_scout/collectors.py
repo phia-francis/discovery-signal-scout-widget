@@ -25,6 +25,11 @@ try:  # pragma: no cover
     from discovery_utils.getters import hansard as du_hansard  # type: ignore
 except Exception:
     du_hansard = None
+try:
+    from discovery_utils.getters import gtr, hansard  # type: ignore
+    HAVE_DU = True
+except Exception:
+    HAVE_DU = False
 
 def get_feed_cached(url: str, ttl_sec: int = 6 * 3600) -> feedparser.FeedParserDict:
     """Return a cached feedparser result, refreshing if the cache is stale."""
@@ -271,6 +276,57 @@ def collect_discovery_utils(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
         rows.extend(_collect_du_hansard(window_days))
     if "crunchbase" in sources:
         rows.extend(_collect_du_crunchbase(window_days))
+def collect_discovery_utils(window_days: int) -> List[Dict[str, Any]]:
+    rows: List[Dict[str, Any]] = []
+    now = datetime.now(timezone.utc)
+    if not HAVE_DU:
+        return rows
+    # GTR
+    try:
+        GTR = gtr.GtrGetters(vector_db_path="./vector_dbs")  # type: ignore
+        for q in ["roadmap energy flexibility","pilot heat pump retrofit","UPF policy trial","early years toolkit","GLP-1 shortage equity"]:
+            hits = GTR.vector_search(q, n_results=5)
+            for h in hits:
+                d = parse_date(str(h.get("start","")) or str(h.get("updated","")))
+                if not d:
+                    continue
+                if d.tzinfo is None:
+                    d = d.replace(tzinfo=timezone.utc)
+                if (now - d).days > window_days:
+                    continue
+                rows.append({
+                    "title": clean_html(h.get("title","")),
+                    "summary": clean_html(h.get("abstractText","") or h.get("abstract","") or ""),
+                    "url": canonical_url(h.get("projectUrl","") or h.get("url","")),
+                    "date": d.isoformat(),
+                    "source": "DU_GTR",
+                    "tier": "policy"
+                })
+    except Exception as e:
+        logging.info("GTR vector unavailable: %s", e)
+    # Hansard
+    try:
+        HANS = hansard.HansardGetters()  # type: ignore
+        for q in ["ultra-processed backlash","GLP-1 shortage","sleep inequality","community retrofit lessons"]:
+            hits = HANS.text_search(q, n_results=5)
+            for h in hits:
+                d = parse_date(h.get("date",""))
+                if not d:
+                    continue
+                if d.tzinfo is None:
+                    d = d.replace(tzinfo=timezone.utc)
+                if (now - d).days > window_days:
+                    continue
+                rows.append({
+                    "title": clean_html(h.get("title","")) or f"Hansard: {q}",
+                    "summary": clean_html(h.get("snippet","") or ""),
+                    "url": canonical_url(h.get("url","")),
+                    "date": d.isoformat(),
+                    "source": "DU_Hansard",
+                    "tier": "policy"
+                })
+    except Exception as e:
+        logging.info("Hansard search unavailable: %s", e)
     return rows
 
 def collect_all(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -280,4 +336,5 @@ def collect_all(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
             continue
         items += collect_rss(s, cfg["window_days"], cfg["rate_delay_sec"])
     items += collect_discovery_utils(cfg)
+    items += collect_discovery_utils(cfg["window_days"])
     return items

@@ -14,6 +14,11 @@ jobs:
         shell: bash
         working-directory: agent
     steps:
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -27,6 +32,45 @@ jobs:
         run: ruff check .
       - name: Pytest
         run: pytest -q
+          cd agent
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install pytest>=8.1.1 ruff>=0.6.8
+      - name: Ruff
+        run: ruff check .
+      - name: Pytest
+        run: pytest -q
+        run: |
+          cd agent
+          ruff check .
+      - name: Pytest
+        run: |
+          cd agent
+          pytest -q
+        working-directory: agent
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install pytest>=8.1.1 ruff>=0.6.8
+      - name: Lint
+        working-directory: agent
+        run: ruff check .
+      - name: Test
+        working-directory: agent
+        run: pytest -q
+          python -m pip install -e .[dev]
+          pip install -r requirements.txt
+          pip install pytest>=8.1.1 ruff>=0.6.8
+          pip install -e .[dev]
+        run: |
+          pip install -r agent/requirements.txt
+          pip install -e agent/.[dev]
+      - name: Ruff
+        run: ruff check .
+        working-directory: agent
+      - name: Pytest
+        run: pytest -q
+        working-directory: agent
 
   deploy:
     needs: test
@@ -37,6 +81,13 @@ jobs:
       run:
         shell: bash
         working-directory: agent
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+    environment:
+      name: prod
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -53,11 +104,56 @@ jobs:
           CRUNCHBASE_API_KEY: ${{ secrets.CRUNCHBASE_API_KEY }}
         run: python -m signal_scout.cli run --config config.yaml
       - name: QA
+          cd agent
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Run Signal Scout
+        working-directory: agent
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Run Signal Scout
+        working-directory: agent
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+        run: python -m signal_scout.cli run --config config.yaml
+      - name: QA
+        working-directory: agent
+          python -m pip install -e .
+      - name: Run Signal Scout
+        working-directory: agent
+          pip install -r requirements.txt
+          pip install -e .
+      - name: Run Signal Scout
+        working-directory: agent
+      - name: Run Signal Scout
+        working-directory: agent
+      - name: Install agent
+        run: |
+          pip install -r agent/requirements.txt
+          pip install -e agent/.
+      - name: Run Signal Scout
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+        run: |
+          cd agent
+          python -m signal_scout.cli run --config config.yaml
+      - name: QA
+        run: |
+          cd agent
+          python -m signal_scout.cli run --config config.yaml
+      - name: QA
+        working-directory: agent
+          signal-scout run --config agent/config.yaml
+      - name: QA
         run: |
           python - <<'PY'
           import glob
           import json
           paths = sorted(glob.glob('signals/*.json'))
+          paths = sorted(glob.glob('agent/signals/*.json'))
           assert paths, "No signal JSON generated"
           rows = json.load(open(paths[-1]))
           assert rows, "No rows"

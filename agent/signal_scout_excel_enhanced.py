@@ -524,6 +524,8 @@ def collect_all(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
             continue
         items.extend(collect_rss(source, cfg["window_days"], delay))
     items.extend(collect_discovery_utils(cfg))
+    for source in cfg["sources"]:
+        items.extend(collect_rss(source, cfg["window_days"], cfg.get("rate_delay_sec", 0.2)))
     return items
 
 
