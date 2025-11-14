@@ -11,6 +11,9 @@ jobs:
     environment: prod
     permissions:
       contents: write
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -54,6 +57,8 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
+
+          latest = Path('signals/latest.json')
           latest = Path('signals/latest.json')
           latest = Path('agent/signals/latest.json')
           assert latest.exists(), "latest.json missing"
