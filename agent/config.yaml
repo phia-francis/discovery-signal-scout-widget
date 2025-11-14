@@ -41,3 +41,4 @@ sources:
   - {name: "govuk_all", url: "https://www.gov.uk/search/news-and-communications.atom?order=updated-newest", tier: "policy"}
   - {name: "DU_GTR", url: "discovery_utils:gtr", tier: "policy"}
   - {name: "DU_Hansard", url: "discovery_utils:hansard", tier: "policy"}
+  - {name: "DU_Crunchbase", url: "discovery_utils:crunchbase", tier: "trade"}

@@ -21,6 +21,8 @@ dependencies = [
   "pandas>=2.2.2",
   "PyYAML>=6.0.2",
   "simhash>=2.1.2",
+  "langdetect>=1.0.9",
+  "discovery-utils @ git+https://github.com/nestauk/discovery_utils.git"
   "langdetect>=1.0.9"
 ]
 

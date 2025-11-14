@@ -20,6 +20,8 @@ from dateutil import parser as dparser
 from rapidfuzz import fuzz
 from simhash import Simhash
 
+from signal_scout.collectors import collect_discovery_utils
+
 
 @dataclass
 class MissionKeywords:
@@ -516,6 +518,12 @@ def collect_rss(source: Dict[str, Any], window_days: int, delay: float) -> List[
 
 def collect_all(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
     items: List[Dict[str, Any]] = []
+    delay = cfg.get("rate_delay_sec", 0.2)
+    for source in cfg["sources"]:
+        if str(source.get("url", "")).startswith("discovery_utils:"):
+            continue
+        items.extend(collect_rss(source, cfg["window_days"], delay))
+    items.extend(collect_discovery_utils(cfg))
     for source in cfg["sources"]:
         items.extend(collect_rss(source, cfg["window_days"], cfg.get("rate_delay_sec", 0.2)))
     return items

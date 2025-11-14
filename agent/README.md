@@ -50,5 +50,10 @@ The scheduled `daily-agent.yml` workflow uses the Excel-enhanced runner to publi
 `signals/latest.json` and date-stamped snapshots to the `gh-pages` branch. Update the
 workbook (`Auto horizon scanning_ keywords.xlsx`) to tweak mission/category matches.
 
+Discovery Utils: the default requirements install `discovery_utils` (from the Nesta
+GitHub repository) so the agent can enrich the shortlist with GtR, Hansard and
+Crunchbase queries. If you run Crunchbase searches you must provide
+`CRUNCHBASE_API_KEY` (export locally or add it as an Actions secret/environment
+variable) so the helper library can authenticate.
 Optional: install discovery_utils for GtR/Hansard enrichment.
 Environment for LLM archetype (optional): LLM_PROVIDER=openai and OPENAI_API_KEY=...

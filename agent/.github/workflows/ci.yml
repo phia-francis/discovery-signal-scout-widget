@@ -45,6 +45,7 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+          CRUNCHBASE_API_KEY: ${{ secrets.CRUNCHBASE_API_KEY }}
         run: signal-scout run --config config.yaml
       - name: Upload signals artifact
         uses: actions/upload-artifact@v4

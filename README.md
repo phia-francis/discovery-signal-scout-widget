@@ -38,6 +38,9 @@ You can operate the full stack straight from the GitHub UI:
    - For the optional LLM fallback used by the gated `deploy` job in `ci.yml`, add
      `OPENAI_API_KEY` (and `OPENAI_MODEL` if you want to override the default model)
      under the `prod` environment.
+   - To enable the Crunchbase discovery_utils enrichment, add `CRUNCHBASE_API_KEY`
+     to the same environment (Crunchbase queries will be skipped if the key is
+     absent).
    - If your widget build needs a custom npm registry or proxy, add `NPM_REGISTRY_URL`,
      `NPM_HTTP_PROXY`, and `NPM_HTTPS_PROXY` repository secrets (the deploy workflow
      reads them automatically).

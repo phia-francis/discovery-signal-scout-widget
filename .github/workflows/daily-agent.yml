@@ -16,6 +16,7 @@ jobs:
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+      CRUNCHBASE_API_KEY: ${{ secrets.CRUNCHBASE_API_KEY }}
     defaults:
       run:
         shell: bash
