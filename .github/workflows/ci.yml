@@ -10,6 +10,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -20,6 +24,12 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
           python -m pip install pytest>=8.1.1 ruff>=0.6.8
+      - name: Lint
+        working-directory: agent
+        run: ruff check .
+      - name: Test
+        working-directory: agent
+        run: pytest -q
           python -m pip install -e .[dev]
           pip install -r requirements.txt
           pip install pytest>=8.1.1 ruff>=0.6.8
@@ -38,6 +48,12 @@ jobs:
     needs: test
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
     environment:
       name: prod
     steps:
@@ -51,6 +67,12 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
       - name: Run Signal Scout
+        working-directory: agent
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+        run: python -m signal_scout.cli run --config config.yaml
+      - name: QA
         working-directory: agent
           python -m pip install -e .
       - name: Run Signal Scout
