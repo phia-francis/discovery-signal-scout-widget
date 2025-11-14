@@ -16,6 +16,7 @@ export default function App() {
     <SignalScoutWidget
       title="Signal Scout"
       initialUrl={DEFAULT_JSON}
+      initialUrl="/signals/latest.json"
       autoRefreshMs={300_000}
     />
   );
@@ -52,3 +53,5 @@ npm install
 
 Once the proxy configuration is in place, Vite builds (`npm run build`) will
 work without attempting to bypass your corporate gateway.
+Placeholder directory for the React-based Signal Scout widget. The widget will consume
+`signals/latest.json` produced by the agent workflow when implemented.
