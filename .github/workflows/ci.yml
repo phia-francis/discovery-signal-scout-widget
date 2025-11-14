@@ -19,6 +19,19 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install dependencies
+        run: |
+          cd agent
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install pytest>=8.1.1 ruff>=0.6.8
+      - name: Ruff
+        run: |
+          cd agent
+          ruff check .
+      - name: Pytest
+        run: |
+          cd agent
+          pytest -q
         working-directory: agent
         run: |
           python -m pip install --upgrade pip
@@ -62,6 +75,11 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install runtime dependencies
+        run: |
+          cd agent
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Run Signal Scout
         working-directory: agent
         run: |
           python -m pip install --upgrade pip
@@ -92,6 +110,11 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
         run: |
+          cd agent
+          python -m signal_scout.cli run --config config.yaml
+      - name: QA
+        run: |
+          cd agent
           python -m signal_scout.cli run --config config.yaml
       - name: QA
         working-directory: agent
