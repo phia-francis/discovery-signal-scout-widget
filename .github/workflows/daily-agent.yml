@@ -19,6 +19,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - name: Install dependencies
@@ -28,6 +30,21 @@ jobs:
           python -m pip install -r requirements.txt
       - name: Run Excel-enhanced agent
         working-directory: agent
+      - name: Install agent
+        working-directory: agent
+        run: |
+          python -m pip install -e .
+      - name: Run Excel-enhanced agent
+        working-directory: agent
+          pip install -r requirements.txt
+      - name: Install agent
+        run: |
+          pip install -r agent/requirements.txt
+          pip install -e agent/.
+      - name: Run Excel-enhanced agent
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
         run: |
           python signal_scout_excel_enhanced.py \
             --config config.yaml \
@@ -35,11 +52,20 @@ jobs:
             --out_dir signals
       - name: QA
         working-directory: agent
+          python agent/signal_scout_excel_enhanced.py \
+            --config agent/config.yaml \
+            --excel_keywords "agent/Auto horizon scanning_ keywords.xlsx" \
+            --out_dir agent/signals
+      - name: QA
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
           latest = Path('signals/latest.json')
+
+          latest = Path('signals/latest.json')
+          latest = Path('signals/latest.json')
+          latest = Path('agent/signals/latest.json')
           assert latest.exists(), "latest.json missing"
           rows = json.loads(latest.read_text('utf-8'))
           assert rows, "No rows"
@@ -54,6 +80,12 @@ jobs:
           cp signals/*.json publish-signals/
           if ls signals/*.csv 1>/dev/null 2>&1; then
             cp signals/*.csv publish-signals/
+        run: |
+          rm -rf agent/publish-signals
+          mkdir -p agent/publish-signals
+          cp agent/signals/*.json agent/publish-signals/
+          if ls agent/signals/*.csv 1>/dev/null 2>&1; then
+            cp agent/signals/*.csv agent/publish-signals/
           fi
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
