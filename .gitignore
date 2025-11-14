@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.env
+.venv
+.cache/
+signals/*
+!signals/.gitignore
+agent/publish-signals/
+agent/Auto horizon scanning_ keywords.xlsx
+node_modules/
+widget/dist/
+widget/.vite/

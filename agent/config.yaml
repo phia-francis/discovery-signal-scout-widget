@@ -1,0 +1,44 @@
+window_days: 30
+daily_top_n: 7
+rate_delay_sec: 0.2
+weights:
+  relevance: 0.35
+  credibility: 0.30
+  novelty: 0.20
+  archetype: 0.15
+  recency_bonus: 0.05
+per_source_cap: 3
+ensure_archetype_diversity: 3
+ensure_mission_coverage: true
+archetype_nudges:
+  outlier_novelty_bonus: 1.0
+  canary_cred_bonus: 0.5
+  field_fit_bonus: 0.5
+
+topic_lattice:
+  AHL: ["weight","diet","sugar","food reformulation","stress","poverty","food deserts","food environments","behaviour","decision-making","healthy foods","ultra-processed","UPF","genetics","drug prescription","GLP-1","healthtech","sleep","body positivity","brain"]
+  ASF: ["heat pumps","energy efficiency","grid flexibility","renewables","materials decarbonisation","urban heat","adaptation","air quality","demand response","time-of-use"]
+  AFS: ["child development","early years","learning tech","family support","nutrition for children","parenting interventions","home learning environment"]
+
+archetype_patterns:
+  shape_of_things: ["(pilot|rollout|uptake|deployment|orders|capacity|interoperability|standard|protocol|retrofitting)"]
+  counter_intuitive: ["(counter[- ]?intuitive|paradox|backfire|rebound|contrary)", "(trial|RCT|natural experiment|meta-analys)"]
+  canary: ["(backlash|inactivism|blowback|recall|adverse|warning|shortage|surge|misinfo|heatwave|wildfire|air quality)"]
+  insights_from_field: ["(case study|municipal|council|local authority|trust|NHS|clinician|teacher|toolkit|playbook|lessons|implementation|on the ground)"]
+  outlier: ["(artist|collective|hack|workaround|grassroots|lawsuit|strike|first[- ]of[- ]its[- ]kind|edge case|unprecedented)"]
+  big_idea: ["(manifesto|white paper|framework|theory of change|grand challenge|roadmap|review|commission|think tank)"]
+
+source_weights: {"journal": 1.0, "preprint": 0.8, "policy": 0.9, "trade": 0.6, "newsletter": 0.5, "blog": 0.4}
+
+sources:
+  - {name: "bioRxiv_Nutrition", url: "https://www.biorxiv.org/collection/nutrition/rss.xml", tier: "preprint"}
+  - {name: "medRxiv_Nutrition", url: "https://www.medrxiv.org/collection/nutrition/rss.xml", tier: "preprint"}
+  - {name: "Nature_News_Health", url: "https://www.nature.com/subjects/public-health-and-health-services/news.rss", tier: "journal"}
+  - {name: "BMJ_news", url: "https://www.bmj.com/rss/bmj_latest.xml", tier: "journal"}
+  - {name: "FoodNavigator", url: "https://www.foodnavigator.com/rss", tier: "trade"}
+  - {name: "NutraIngredients", url: "https://www.nutraingredients.com/rss", tier: "trade"}
+  - {name: "IEEE_Spectrum", url: "https://spectrum.ieee.org/feed", tier: "trade"}
+  - {name: "govuk_all", url: "https://www.gov.uk/search/news-and-communications.atom?order=updated-newest", tier: "policy"}
+  - {name: "DU_GTR", url: "discovery_utils:gtr", tier: "policy"}
+  - {name: "DU_Hansard", url: "discovery_utils:hansard", tier: "policy"}
+  - {name: "DU_Crunchbase", url: "discovery_utils:crunchbase", tier: "trade"}
